@@ -24,17 +24,25 @@ else:
     print("Data tidak valid. Mengembalikan hasil untuk iris..")
     data = datasets.load_iris()  
 
+print("Masukkan pilihan kolom pertama: ")
+for i in range(len(data.feature_names)):
+    print(str(i+1) + ". " + data.feature_names[i].title())
+first_choice = int(input()) - 1
+
+print("Masukkan pilihan kolom kedua: ")
+for i in range(len(data.feature_names)):
+    print(str(i+1) + ". " + data.feature_names[i].title())
+second_choice = int(input()) - 1
+
 df = pd.DataFrame(data.data, columns=data.feature_names)
 df['Target'] = pd.DataFrame(data.target)
-print(df.shape)
-df.head()
 
 #visualisasi hasil ConvexHull
 plt.figure(figsize = (10, 6))
 colors = ['b','r','g']
-plt.title('Petal Width vs Petal Length')
-plt.xlabel(data.feature_names[0])
-plt.ylabel(data.feature_names[1])
+plt.title(str(data.feature_names[first_choice].title()) + " vs " + str(data.feature_names[second_choice].title()))
+plt.xlabel(data.feature_names[first_choice])
+plt.ylabel(data.feature_names[second_choice])
 for i in range(len(data.target_names)):
     bucket = df[df['Target'] == i]
     bucket = bucket.iloc[:,[0,1]].values
