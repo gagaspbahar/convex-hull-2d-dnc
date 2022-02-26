@@ -1,37 +1,61 @@
-# TODO: Make the sort function
-# TODO: Make the divide part
-# TODO: Make the combine part
-# ! Consider edge cases
 import numpy as np
 
+convexList = []
+
 def myConvexHull(bucket):
-    sorted_bucket = bucket(key=lambda i: i[0])
+    sorted_bucket = bucket[bucket[:, 0].argsort()]
+    sorted_bucket = sorted_bucket.tolist()
     p1 = sorted_bucket[0]
     pn = sorted_bucket[-1]
+    global convexList
+    convexList = [p1, pn]
     maxtable = [point for point in sorted_bucket if pointDetermination([p1, pn], point) > 0]
     mintable = [point for point in sorted_bucket if pointDetermination([p1, pn], point) < 0]
-     
-    
-    p_global_max = (maxtable[0] == maxtable[1]) if (calculateAngle(p1,maxtable[0],pn) > calculateAngle(p1,maxtable[1],pn) if maxtable[1] else maxtable[0]) else maxtable[0]
-    p_global_min = (mintable[0] == mintable[1]) if (calculateAngle(p1, mintable[0], pn) > calculateAngle(p1, mintable[1], pn) if mintable[1] else mintable[0]) else mintable[0]
+    myConvexHullRecursion(p1, pn, maxtable, True)
+    myConvexHullRecursion(p1, pn, mintable, False)
+    return convexList
 
-    def myConvexHullRecursion(p_start, p_max):
-
-        pass
-
-
-def calculateAngle(p1, p2, p3):
-    a = np.array(p1)
-    b = np.array(p2)
-    c = np.array(p3)
-    ba = a - b
-    bc = c - b
-    cosine_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc))
-    return np.arccos(cosine_angle)
+def myConvexHullRecursion(p_start, p_end, table, isUpper):
+    global convexList
+    if(isUpper):
+        if(len(table) == 0):
+            return
+        else:
+            p_start_index = convexList.index(p_start)
+            if(len(table) == 1):
+                p_max = table[0]
+                convexList.insert(p_start_index+1, p_max)
+                return
+            else:
+                points = [pointDetermination([p_start, p_end], point) for point in table]
+                max_index = points.index(max(points))
+                p_max = table[max_index]
+                convexList.insert(p_start_index+1, p_max)
+                new_table_start = [point for point in table if pointDetermination([p_start, p_max], point) > 0]
+                new_table_end = [point for point in table if pointDetermination([p_max, p_end], point) > 0]
+                myConvexHullRecursion(p_start, p_max, new_table_start, True)
+                myConvexHullRecursion(p_max, p_end, new_table_end, True)
+    else:
+        if(len(table) == 0):
+            return
+        else:
+            p_end_index = convexList.index(p_end)
+            if(len(table) == 1):
+                p_min = table[0]
+                convexList.insert(p_end_index+1, p_min)
+                return
+            else:
+                points = [pointDetermination([p_start, p_end], point) for point in table]
+                min_index = points.index(min(points))
+                p_min = table[min_index]
+                convexList.insert(p_end_index+1, p_min)
+                new_table_start = [point for point in table if pointDetermination([p_start, p_min], point) < 0]
+                new_table_end = [point for point in table if pointDetermination([p_min, p_end], point) < 0]
+                myConvexHullRecursion(p_start, p_min, new_table_start, False)
+                myConvexHullRecursion(p_min, p_end, new_table_end, False)
 
 def pointDetermination(line, point):
     p1 = line[0]
     p2 = line[-1]
-    res = p1[0] * p2[1] + point[0] * p1[1] + p1[0] * point[1] - \
-        point[0] * p2[1] - p2[0] * p1[1] - p1[0] * point[1]
-    return res
+    a = np.array([[p1[0], p1[1], 1], [p2[0], p2[1], 1], [point[0], point[1], 1]])
+    return np.linalg.det(a)
