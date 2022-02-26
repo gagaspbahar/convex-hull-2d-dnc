@@ -45,9 +45,8 @@ plt.xlabel(data.feature_names[first_choice])
 plt.ylabel(data.feature_names[second_choice])
 for i in range(len(data.target_names)):
     bucket = df[df['Target'] == i]
-    bucket = bucket.iloc[:,[0,1]].values
+    bucket = bucket.iloc[:,[first_choice, second_choice]].values
     hull = myConvexHull(bucket)
-    print(hull)
     plt.scatter(bucket[:, 0], bucket[:, 1], label=data.target_names[i])
     for j in range(len(hull)-1):
         plt.plot([hull[j][0], hull[j+1][0]], [hull[j][1], hull[j+1][1]], colors[i])
